@@ -37,7 +37,6 @@ async function loadData() {
     try {
         const tRes = await fetch(`${API}/tasks`);
         const tData = await tRes.json();
-        // Safety check: Only assign if it's actually an array
         tasks = Array.isArray(tData) ? tData : []; 
         
         const nRes = await fetch(`${API}/notes`);
@@ -54,7 +53,6 @@ async function loadData() {
         
     } catch (e) {
         console.warn('Backend offline or init error', e);
-        // Fallback to empty arrays if the network fails completely
         tasks = []; notes = []; resources = []; flashcards = [];
     }
     renderAll();
