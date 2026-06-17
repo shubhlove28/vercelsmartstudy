@@ -36,19 +36,26 @@ buttons.forEach(btn => {
 async function loadData() {
     try {
         const tRes = await fetch(`${API}/tasks`);
-        tasks = await tRes.json();
+        const tData = await tRes.json();
+        // Safety check: Only assign if it's actually an array
+        tasks = Array.isArray(tData) ? tData : []; 
         
         const nRes = await fetch(`${API}/notes`);
-        notes = await nRes.json();
+        const nData = await nRes.json();
+        notes = Array.isArray(nData) ? nData : [];
         
         const rRes = await fetch(`${API}/resources`);
-        resources = await rRes.json();
+        const rData = await rRes.json();
+        resources = Array.isArray(rData) ? rData : [];
         
         const fRes = await fetch(`${API}/flashcards`);
-        flashcards = await fRes.json();
+        const fData = await fRes.json();
+        flashcards = Array.isArray(fData) ? fData : [];
         
     } catch (e) {
         console.warn('Backend offline or init error', e);
+        // Fallback to empty arrays if the network fails completely
+        tasks = []; notes = []; resources = []; flashcards = [];
     }
     renderAll();
 }
