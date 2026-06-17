@@ -393,19 +393,24 @@ themeBtn.onclick = () => {
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
 };
 
+// --- INIT & THEME ---
 if (localStorage.getItem('theme') === 'light') {
     document.body.classList.add('light');
-    themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+    const themeBtn = document.getElementById('theme-toggle');
+    if(themeBtn) themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
 }
 
-loadData();
 updateTimers();
 
 // --- RBAC & LOGIN LOGIC ---
 window.login = function(role) {
     localStorage.setItem('userRole', role);
-    document.getElementById('login-modal').classList.add('hidden');
+    const loginModal = document.getElementById('login-modal');
+    if (loginModal) loginModal.classList.add('hidden');
+    
+    // Now that they are logged in, load the data and set the view
     applyRoleView(role);
+    loadData(); 
 };
 
 function applyRoleView(role) {
@@ -419,18 +424,22 @@ function applyRoleView(role) {
     switchTab(isTeacher ? 'teacher-dash' : 'dashboard');
 }
 
+// --- BOOTSTRAP THE APP ---
 // Check if user is already logged in on page load
-// Check if user is already logged in on page load
-const savedRole = localStorage.getItem('userRole');
-
-if (savedRole) {
+document.addEventListener('DOMContentLoaded', () => {
+    const savedRole = localStorage.getItem('userRole');
     const loginModal = document.getElementById('login-modal');
-    // Only try to hide the modal if it actually exists in your HTML
-    if (loginModal) {
-        loginModal.classList.add('hidden');
+
+    if (savedRole) {
+        // User is known. Hide modal, set UI, and fetch data.
+        if (loginModal) loginModal.classList.add('hidden');
+        applyRoleView(savedRole);
+        loadData();
+    } else {
+        // User is unknown. Ensure modal is visible and do NOT load data yet.
+        if (loginModal) loginModal.classList.remove('hidden');
     }
-    applyRoleView(savedRole);
-}
+});
 
 // --- ANTI-CHEATING: PAGE VISIBILITY API  ---
 document.addEventListener("visibilitychange", () => {
