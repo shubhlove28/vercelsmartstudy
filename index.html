@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Study Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>StudySmart</span>
+            </div>
+            <button id="theme-toggle" class="theme-btn-small"><i class="fa-solid fa-moon"></i></button>
+        </div>
+
+        <nav>
+            <button class="tab-btn active" data-tab="dashboard">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </button>
+            <button class="tab-btn" data-tab="tasks">
+                <i class="fa-solid fa-list-check"></i> Tasks
+            </button>
+            <button class="tab-btn" data-tab="flashcards">
+                <i class="fa-solid fa-layer-group"></i> Flashcards
+            </button>
+            <button class="tab-btn" data-tab="pomodoro">
+                <i class="fa-solid fa-clock"></i> Focus Timer
+            </button>
+            <button class="tab-btn" data-tab="resources">
+                <i class="fa-solid fa-book"></i> Resources
+            </button>
+            <button class="tab-btn" data-tab="notes">
+                <i class="fa-solid fa-note-sticky"></i> Notes
+            </button>
+            <button class="tab-btn student-only" data-tab="assessments">
+                <i class="fa-solid fa-file-signature"></i> Assessments
+            </button>
+            <button class="tab-btn teacher-only hidden" data-tab="teacher-dash">
+                <i class="fa-solid fa-chalkboard-user"></i> Teacher Panel
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="tip-card">
+                <h3><i class="fa-solid fa-lightbulb"></i> Study Tip</h3>
+                <p id="quote">The Feynman Technique: Teach what you've learned to identify gaps.</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="content">
+
+        <section id="dashboard" class="tab">
+            <div class="header-row">
+                <h1>Study Dashboard</h1>
+                <p class="date-display" id="date-display">Welcome back</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card indigo">
+                    <div class="stat-info">
+                        <p>Pending Tasks</p>
+                        <h2 id="pending-count">0</h2>
+                    </div>
+                    <i class="fa-solid fa-list-check bg-icon"></i>
+                </div>
+                <div class="stat-card amber">
+                    <div class="stat-info">
+                        <p>Study Hours</p>
+                        <h2 id="study-hours">0.0</h2>
+                    </div>
+                    <i class="fa-solid fa-clock bg-icon"></i>
+                </div>
+                <div class="stat-card emerald">
+                    <div class="stat-info">
+                        <p>Resources</p>
+                        <h2 id="resource-count">0</h2>
+                    </div>
+                    <i class="fa-solid fa-book bg-icon"></i>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-info">
+                        <p>Flashcards</p>
+                        <h2 id="flashcard-count">0</h2>
+                    </div>
+                    <i class="fa-solid fa-layer-group bg-icon"></i>
+                </div>
+            </div>
+
+            <div class="dashboard-widgets">
+                
+                <div class="widget-card">
+                    <div class="widget-header">
+                        <h3>Upcoming Tasks</h3>
+                        <button class="text-btn" onclick="switchTab('tasks')">View All</button>
+                    </div>
+                    <div id="dashboard-tasks" class="mini-list">
+                        </div>
+                </div>
+
+                <div class="widget-card center-content">
+                    <h3>Focus Status</h3>
+                    <div class="circular-timer">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="circle-bg" cx="50" cy="50" r="40" />
+                            <circle id="dash-progress" class="circle-progress" cx="50" cy="50" r="40" />
+                        </svg>
+                        <div class="timer-text">
+                            <span id="dash-timer">25:00</span>
+                            <small>Pomodoro</small>
+                        </div>
+                    </div>
+                    <div class="widget-controls">
+                        <button id="dash-start-btn" class="primary-btn small-btn"><i class="fa-solid fa-play"></i></button>
+                        <button id="dash-pause-btn" class="secondary-btn small-btn hidden"><i class="fa-solid fa-pause"></i></button>
+                        <button id="dash-reset-btn" class="secondary-btn small-btn"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="widget-card">
+                    <h3>Quick Note</h3>
+                    <textarea id="quick-note-input" placeholder="Jot down an idea..."></textarea>
+                    <div class="widget-footer">
+                        <button id="save-quick-note" class="primary-btn small">Save Note</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-section">
+                <h3>Recent Resources</h3>
+                <div id="dashboard-resources" class="grid-container">
+                    </div>
+            </div>
+        </section>
+
+        <section id="tasks" class="tab hidden">
+            <h1>Tasks & Assignments</h1>
+            
+            <form id="task-form">
+                <div class="input-group">
+                    <input id="task-title" placeholder="What needs to be done?" required>
+                </div>
+                <div class="input-group">
+                    <input id="task-due" type="date">
+                </div>
+                <div class="input-group">
+                    <select id="task-priority">
+                        <option value="low">Low Priority</option>
+                        <option value="medium" selected>Medium Priority</option>
+                        <option value="high">High Priority</option>
+                    </select>
+                </div>
+                <button class="primary-btn"><i class="fa-solid fa-plus"></i> Add Task</button>
+            </form>
+
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="filterTasks('all')">All</button>
+                <button class="filter-btn" onclick="filterTasks('pending')">Pending</button>
+                <button class="filter-btn" onclick="filterTasks('completed')">Completed</button>
+            </div>
+
+            <div id="tasks-list" class="list-container"></div>
+        </section>
+
+        <section id="flashcards" class="tab hidden">
+            <h1>Flashcards</h1>
+            <form id="flashcard-form">
+                <input id="fc-question" placeholder="Question (Front)" required>
+                <input id="fc-answer" placeholder="Answer (Back)" required>
+                <button class="primary-btn"><i class="fa-solid fa-plus"></i> Add Card</button>
+            </form>
+            <div id="flashcards-list" class="flashcard-grid">
+                </div>
+        </section>
+
+        <section id="pomodoro" class="tab hidden">
+            <h1>Focus Timer</h1>
+            <div class="pomodoro-wrapper">
+                <div class="pomodoro-container">
+                    <div id="timer">25:00</div>
+                    <p class="timer-status">Focus Session</p>
+                </div>
+                <div class="controls">
+                    <button id="start" class="primary-btn">Start Timer</button>
+                    <button id="pause" class="primary-btn hidden">Pause</button>
+                    <button id="reset" class="secondary-btn">Reset</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources" class="tab hidden">
+            <h1>Resources</h1>
+            <form id="resource-form">
+                <input id="res-title" placeholder="Resource Title" required>
+                <input id="res-url" placeholder="URL Link" required>
+                <select id="res-category">
+                    <option value="video">Video</option>
+                    <option value="book">Book / PDF</option>
+                    <option value="website">Website</option>
+                    <option value="paper">Research Paper</option>
+                </select>
+                <button class="primary-btn"><i class="fa-solid fa-save"></i> Save</button>
+            </form>
+            <div id="resource-list" class="grid-container"></div>
+        </section>
+
+        <section id="notes" class="tab hidden">
+            <h1>Study Notes</h1>
+            <form id="note-form" class="note-input-area">
+                <input id="note-title" placeholder="Note Title" required>
+                <textarea id="note-content" placeholder="Write your thoughts here..." rows="3"></textarea>
+                <button class="primary-btn"><i class="fa-solid fa-paper-plane"></i> Save Note</button>
+            </form>
+            <div id="notes-list" class="masonry-container"></div>
+        </section>
+
+        <section id="assessments" class="tab hidden student-only">
+            <h1>Assessments</h1>
+            
+            <div id="exam-start-card" class="widget-card">
+                <h3>Mock Test: Core Computer Science</h3>
+                <p class="mt-2"><i class="fa-solid fa-clock"></i> 5 Minutes | <i class="fa-solid fa-list"></i> 3 Questions</p>
+                <button class="primary-btn mt-2" onclick="startExam()">Start Test Now</button>
+            </div>
+
+            <div id="exam-container" class="widget-card hidden">
+                <div class="header-row" style="margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                    <h3 id="q-number">Question 1 of 3</h3>
+                    <span id="exam-timer" style="color: var(--red); font-weight: bold; font-size: 1.2rem;">05:00</span>
+                </div>
+                
+                <div id="question-area" class="mt-2" style="font-size: 1.1rem; margin-bottom: 20px;">
+                    </div>
+                <div id="options-area">
+                    </div>
+
+                <div class="widget-controls mt-2" style="justify-content: space-between; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <button id="prev-btn" class="secondary-btn small" onclick="navQuestion(-1)">Previous</button>
+                    <button id="next-btn" class="primary-btn small" onclick="navQuestion(1)">Next</button>
+                    <button id="submit-exam-btn" class="primary-btn small hidden" style="background: var(--emerald);" onclick="submitExam()">Submit Exam</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="teacher-dash" class="tab hidden teacher-only">
+            <h1>Teacher Dashboard</h1>
+            
+            <div class="widget-card mt-2">
+                <h3>Test Settings</h3>
+                <div style="display:flex; gap:10px; flex-wrap: wrap;" class="mt-2">
+                    <input type="number" id="config-duration" placeholder="Duration (Minutes)" value="5">
+                    <input type="number" id="config-count" placeholder="Number of Questions" value="3">
+                    <button class="primary-btn" onclick="saveTestConfig()">Save Settings</button>
+                </div>
+            </div>
+
+            <div class="widget-card mt-2">
+                <h3>Add Custom Question</h3>
+                <div style="display:flex; flex-direction:column; gap:10px;" class="mt-2">
+                    <input type="text" id="custom-q-text" placeholder="Question Text (e.g., What is CPU?)">
+                    <input type="text" id="custom-q-options" placeholder="Options separated by commas (e.g., Apple, Banana, Cat, Dog)">
+                    <select id="custom-q-ans">
+                        <option value="0">Option 1 is correct</option>
+                        <option value="1">Option 2 is correct</option>
+                        <option value="2">Option 3 is correct</option>
+                        <option value="3">Option 4 is correct</option>
+                    </select>
+                    <button class="secondary-btn" onclick="addCustomQuestion()"><i class="fa-solid fa-plus"></i> Add to Exam Bank</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+
+<script src="script.js"></script>
+
+<div id="login-modal" class="modal">
+    <div class="widget-card center-content">
+        <h2>StudySmart Portal</h2>
+        <div class="mt-2" style="display:flex; gap:10px;">
+            <button onclick="login('student')" class="primary-btn">I am a Student</button>
+            <button onclick="login('teacher')" class="secondary-btn">I am a Teacher</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Responsible Login and Registration Form</title>
+  <link rel="stylesheet" href="login-style.css" />
+</head>
+<body>
+  <div class="container" id="container">
+    <!-- Registration Form -->
+    <div class="form-container sign-up-container">
+      <form>
+        <h1>Registration</h1>
+        <input type="text" placeholder="Username" />
+        <input type="email" placeholder="Email" />
+        <input type="password" placeholder="Password" />
+        <button>Register</button>
+      </form>
+    </div>
+
+    <!-- Login Form -->
+    <div class="form-container sign-in-container">
+      <form>
+        <h1>Login</h1>
+        <input type="text" placeholder="Username" />
+        <input type="password" placeholder="Password" />
+        <a href="#">Forgot password?</a>
+        <button>Login</button>
+        <span>or login with social platforms</span>
+        <div class="social-icons">
+          <a href="#"><img src="https://img.icons8.com/ios-filled/20/000000/google-logo.png"/></a>
+          <a href="#"><img src="https://img.icons8.com/ios-filled/20/000000/facebook-new.png"/></a>
+          <a href="#"><img src="https://img.icons8.com/ios-filled/20/000000/linkedin.png"/></a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Overlay Panels -->
+    <div class="overlay-container">
+      <div class="overlay">
+        <div class="overlay-panel overlay-left">
+          <h2>Welcome Back!</h2>
+          <p>Already have an account?</p>
+          <button class="ghost" id="signIn">Login</button>
+        </div>
+        <div class="overlay-panel overlay-right">
+          <h2>Hello, Welcome!</h2>
+          <p>Don't have an account?</p>
+          <button class="ghost" id="signUp">Register</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="login-script.js"></script>
+</body>
+</html>
