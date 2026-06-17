@@ -420,9 +420,15 @@ function applyRoleView(role) {
 }
 
 // Check if user is already logged in on page load
+// Check if user is already logged in on page load
 const savedRole = localStorage.getItem('userRole');
+
 if (savedRole) {
-    document.getElementById('login-modal').classList.add('hidden');
+    const loginModal = document.getElementById('login-modal');
+    // Only try to hide the modal if it actually exists in your HTML
+    if (loginModal) {
+        loginModal.classList.add('hidden');
+    }
     applyRoleView(savedRole);
 }
 
