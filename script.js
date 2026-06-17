@@ -561,3 +561,8 @@ window.addCustomQuestion = function() {
     document.getElementById('custom-q-options').value = '';
     alert("Question added to the bank successfully!");
 };
+window.selectOption = function(index) {
+    studentAnswers[currentQ] = index;
+    // Refresh the UI to show the selection
+    renderQuestion();
+};
