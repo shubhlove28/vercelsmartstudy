@@ -1,5 +1,5 @@
 // --- CONFIGURATION ---
-const API = 'http://localhost:3000'; 
+const API = 'https://rendersmartstudy.onrender.com'; 
 const dateDisplay = document.getElementById('date-display');
 dateDisplay.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
