@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Study Assistant</title>
+    <title>StudySmart AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+   </body>
+</html>
 
 <div class="app">
 
@@ -19,6 +23,22 @@
             </div>
             <button id="theme-toggle" class="theme-btn-small"><i class="fa-solid fa-moon"></i></button>
         </div>
+        <div id="streak-modal" class="modal hidden">
+    <div class="widget-card" style="width: 400px;">
+        <div class="widget-header">
+        <h3 id="calendar-header">Month Year</h3> <button class="text-btn" onclick="document.getElementById('streak-modal').classList.add('hidden')">Close</button>
+    </div>
+        <div id="calendar-grid" class="calendar-grid">
+            <div class="cal-header">Su</div>
+            <div class="cal-header">Mo</div>
+            <div class="cal-header">Tu</div>
+            <div class="cal-header">We</div>
+            <div class="cal-header">Th</div>
+            <div class="cal-header">Fr</div>
+            <div class="cal-header">Sa</div>
+            </div>
+        </div>
+    </div>
 
         <nav>
             <button class="tab-btn active" data-tab="dashboard">
@@ -42,16 +62,21 @@
             <button class="tab-btn student-only" data-tab="assessments">
                 <i class="fa-solid fa-file-signature"></i> Assessments
             </button>
-            <button class="tab-btn teacher-only hidden" data-tab="teacher-dash">
+            <button class="tab-btn teacher-only" data-tab="teacher-dash">
                 <i class="fa-solid fa-chalkboard-user"></i> Teacher Panel
             </button>
         </nav>
 
         <div class="sidebar-footer">
             <div class="tip-card">
+                
                 <h3><i class="fa-solid fa-lightbulb"></i> Study Tip</h3>
-                <p id="quote">The Feynman Technique: Teach what you've learned to identify gaps.</p>
+                <p id="quote">Loading quote...</p>
             </div>
+            
+            <button onclick="logout()" class="secondary-btn" style="width: 100%; margin-top: 15px; border-color: var(--red); color: var(--red);">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
         </div>
     </aside>
 
@@ -59,9 +84,16 @@
 
         <section id="dashboard" class="tab">
             <div class="header-row">
-                <h1>Study Dashboard</h1>
-                <p class="date-display" id="date-display">Welcome back</p>
-            </div>
+    <h1>Study Dashboard</h1>
+    
+    <div class="header-info">
+        <div class="streak-badge" title="Daily Study Streak">
+            <i class="fa-solid fa-fire"></i>
+            <span id="streak-count">0</span>
+        </div>
+        <p class="date-display" id="date-display">Welcome back</p>
+    </div>
+</div>
             
             <div class="stats-grid">
                 <div class="stat-card indigo">
@@ -91,6 +123,12 @@
                         <h2 id="flashcard-count">0</h2>
                     </div>
                     <i class="fa-solid fa-layer-group bg-icon"></i>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-info">
+                        <p>Notes</p>
+                        <h2 id="note-count">0</h2> </div>
+                    <i class="fa-solid fa-note-sticky bg-icon"></i>
                 </div>
             </div>
 
@@ -222,73 +260,178 @@
         </section>
 
         <section id="assessments" class="tab hidden student-only">
-            <h1>Assessments</h1>
-            
-            <div id="exam-start-card" class="widget-card">
-                <h3>Mock Test: Core Computer Science</h3>
-                <p class="mt-2"><i class="fa-solid fa-clock"></i> 5 Minutes | <i class="fa-solid fa-list"></i> 3 Questions</p>
-                <button class="primary-btn mt-2" onclick="startExam()">Start Test Now</button>
+    <div id="exam-start-card" class="widget-card center-content" style="padding: 3rem 1rem;">
+        <i class="fa-solid fa-laptop-code" style="font-size: 4rem; color: var(--primary); margin-bottom: 1rem;"></i>
+        <h2>Ready to Begin?</h2>
+        <p style="color: var(--text-muted); margin: 10px 0 20px 0;">Ensure you have a stable connection. Tab switching is monitored.</p>
+        <button class="primary-btn" style="font-size: 1.1rem; padding: 1rem 2.5rem;" onclick="startExam()">Start Assessment</button>
+    </div>
+
+<div id="exam-container" class="hidden">
+    <div class="mcq-dashboard">
+        
+        <div class="mcq-main widget-card">
+            <div class="exam-header-bar">
+                <div>
+                    <h2 id="q-number" style="margin-bottom: 5px;">Question 1</h2>
+                </div>
+                <div class="timer-badge">
+                    <i class="fa-solid fa-stopwatch"></i> <span id="exam-timer">05:00</span>
+                </div>
             </div>
 
-            <div id="exam-container" class="widget-card hidden">
-                <div class="header-row" style="margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-                    <h3 id="q-number">Question 1 of 3</h3>
-                    <span id="exam-timer" style="color: var(--red); font-weight: bold; font-size: 1.2rem;">05:00</span>
-                </div>
+            <div class="mcq-question-box">
+                <div id="question-area" style="font-size: 1.2rem; font-weight: 500; margin-bottom: 2rem; color: var(--text);">
+                    </div>
                 
-                <div id="question-area" class="mt-2" style="font-size: 1.1rem; margin-bottom: 20px;">
+                <div id="options-area" class="options-grid">
                     </div>
-                <div id="options-area">
-                    </div>
-
-                <div class="widget-controls mt-2" style="justify-content: space-between; border-top: 1px solid var(--border); padding-top: 15px;">
-                    <button id="prev-btn" class="secondary-btn small" onclick="navQuestion(-1)">Previous</button>
-                    <button id="next-btn" class="primary-btn small" onclick="navQuestion(1)">Next</button>
-                    <button id="submit-exam-btn" class="primary-btn small hidden" style="background: var(--emerald);" onclick="submitExam()">Submit Exam</button>
-                </div>
             </div>
-        </section>
 
-        <section id="teacher-dash" class="tab hidden teacher-only">
-            <h1>Teacher Dashboard</h1>
+            <div class="mcq-action-bar">
+                <button id="mark-btn" class="mcq-btn btn-purple" onclick="markForReview()">Mark for Review & Next</button>
+                <button id="clear-btn" class="mcq-btn btn-outline" onclick="clearResponse()">Clear Response</button>
+                <div style="flex-grow: 1;"></div> <button id="save-next-btn" class="mcq-btn btn-blue" onclick="saveAndNext()">Save & Next</button>
+                <button id="submit-exam-btn" class="mcq-btn btn-green hidden" onclick="submitExam()"><i class="fa-solid fa-check-double"></i> Submit Test</button>
+            </div>
+        </div>
+
+        <div class="mcq-sidebar">
             
-            <div class="widget-card mt-2">
-                <h3>Test Settings</h3>
-                <div style="display:flex; gap:10px; flex-wrap: wrap;" class="mt-2">
-                    <input type="number" id="config-duration" placeholder="Duration (Minutes)" value="5">
-                    <input type="number" id="config-count" placeholder="Number of Questions" value="3">
-                    <button class="primary-btn" onclick="saveTestConfig()">Save Settings</button>
+            <div class="widget-card status-summary">
+                <div class="status-item">
+                    <div class="nav-circle nav-answered" id="count-answered">0</div>
+                    <span>Answered</span>
+                </div>
+                <div class="status-item">
+                    <div class="nav-circle nav-marked" id="count-marked">0</div>
+                    <span>Marked</span>
+                </div>
+                <div class="status-item">
+                    <div class="nav-circle nav-not-visited" id="count-not-visited">0</div>
+                    <span>Not Visited</span>
+                </div>
+                <div class="status-item">
+                    <div class="nav-circle nav-not-answered" id="count-not-answered">0</div>
+                    <span>Not Answered</span>
+                </div>
+            </div>
+
+            <div class="widget-card nav-grid-container">
+                <h4 style="margin-bottom: 15px; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">Questions Navigation</h4>
+                <div class="nav-number-grid" id="question-nav-grid">
+                    </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</section>
+
+<section id="teacher-dash" class="tab hidden teacher-only">
+    
+<div class="t-header-row">
+        <div>
+            <h2>Welcome Back, Teacher</h2>
+            <p>Here's what's happening with your classes today.</p>
+        </div>
+    <div class="t-stats-grid">
+        <div class="t-stat-card"><div class="t-icon bg-purple"><i class="fa-solid fa-book-open"></i></div><div class="t-stat-info"><p>Total Classes</p><h3>0</h3></div><div class="t-trend">0 This Week <i class="fa-solid fa-arrow-trend-up"></i></div></div>
+        <div class="t-stat-card"><div class="t-icon bg-blue"><i class="fa-solid fa-user-graduate"></i></div><div class="t-stat-info"><p>Total Students</p><h3>6</h3></div><div class="t-trend">+2 This Week <i class="fa-solid fa-arrow-trend-up"></i></div></div>
+        <div class="t-stat-card"><div class="t-icon bg-orange"><i class="fa-solid fa-clipboard-list"></i></div><div class="t-stat-info"><p>Assignments</p><h3>1</h3></div><div class="t-trend">+1 This Week <i class="fa-solid fa-arrow-trend-up"></i></div></div>
+        <div class="t-stat-card"><div class="t-icon bg-red"><i class="fa-solid fa-calendar-check"></i></div><div class="t-stat-info"><p>Attendance</p><h3>6</h3></div><div class="t-trend">+4 This Week <i class="fa-solid fa-arrow-trend-up"></i></div></div>
+    </div>
+
+    <div class="teacher-content-grid">
+        <div class="t-charts-grid">
+            <div class="t-chart-card">
+                <div class="t-chart-header">
+                    <h3>Students Performance</h3>
+                    <span style="color: var(--primary); font-size: 0.8rem;">weekly <i class="fa-solid fa-chevron-down"></i></span>
+                </div>
+                <div class="canvas-container"><canvas id="performanceChart"></canvas></div>
+            </div>
+            
+            <div class="t-chart-card">
+                <div class="t-chart-header">
+                    <h3>Students Result</h3>
+                    <span style="color: var(--primary); font-size: 0.8rem;">weekly <i class="fa-solid fa-chevron-down"></i></span>
+                </div>
+                <div class="canvas-container"><canvas id="resultChart"></canvas></div>
+            </div>
+
+            <div class="t-chart-card full-width">
+                        <div class="widget-card mt-2">
+    <h3><i class="fa-solid fa-graduation-cap"></i> Student Results</h3>
+    <table class="results-table">
+    <thead>
+        <tr>
+            <th>Student Name</th>
+            <th>Final Score</th>
+            <th>Date Completed</th>
+        </tr>
+    </thead>
+    <tbody id="results-body">
+        </tbody>
+</table>
+</div>
+
+        <div class="t-quick-actions">
+            <button class="t-action-btn"><i class="fa-solid fa-file-pen"></i> Create Assignment</button>
+            <button class="t-action-btn"><i class="fa-solid fa-clipboard-user"></i> Mark Attendance</button>
+            <button class="t-action-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Material</button>
+        </div>
+    </div>
+        </div>
+
+        <div class="t-assessment-management">
+            <h2>Assessment Management</h2>
+            
+            <div class="widget-card">
+                <h3><i class="fa-solid fa-gear"></i> Test Configuration</h3>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Duration (Minutes)</label>
+                        <input type="number" id="config-duration" value="5">
+                    </div>
+                    <div class="input-group">
+                        <label>Question Count</label>
+                        <input type="number" id="config-count" value="3">
+                    </div>
+                    <button class="primary-btn mt-2" onclick="saveTestConfig()">Update Parameters</button>
                 </div>
             </div>
 
             <div class="widget-card mt-2">
-                <h3>Add Custom Question</h3>
-                <div style="display:flex; flex-direction:column; gap:10px;" class="mt-2">
-                    <input type="text" id="custom-q-text" placeholder="Question Text (e.g., What is CPU?)">
-                    <input type="text" id="custom-q-options" placeholder="Options separated by commas (e.g., Apple, Banana, Cat, Dog)">
+                <h3><i class="fa-solid fa-plus"></i> Add Custom Question</h3>
+                <div class="form-grid">
+                    <input type="text" id="custom-q-text" placeholder="Question Text">
+                    <input type="text" id="custom-q-options" placeholder="Options (comma separated: A,B,C,D)">
                     <select id="custom-q-ans">
-                        <option value="0">Option 1 is correct</option>
-                        <option value="1">Option 2 is correct</option>
-                        <option value="2">Option 3 is correct</option>
-                        <option value="3">Option 4 is correct</option>
+                        <option value="0">Correct: Option 1</option>
+                        <option value="1">Correct: Option 2</option>
+                        <option value="2">Correct: Option 3</option>
+                        <option value="3">Correct: Option 4</option>
                     </select>
-                    <button class="secondary-btn" onclick="addCustomQuestion()"><i class="fa-solid fa-plus"></i> Add to Exam Bank</button>
+                    <button class="primary-btn mt-2" onclick="addCustomQuestion()">Add to Bank</button>
                 </div>
             </div>
-        </section>
+            <div class="widget-card mt-2">
+                <h3>Student Results Log</h3>
+                <table class="results-table">
+                    <thead><tr><th>Name</th><th>Score</th><th>Date</th></tr></thead>
+                    <tbody id="results-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
 
     </main>
 </div>
 
-<div id="login-modal" class="modal">
-    <div class="widget-card center-content">
-        <h2>StudySmart Portal</h2>
-        <div class="mt-2" style="display:flex; gap:10px;">
-            <button onclick="login('student')" class="primary-btn">I am a Student</button>
-            <button onclick="login('teacher')" class="secondary-btn">I am a Teacher</button>
-        </div>
-    </div>
-</div>
-    <script src="script.js"></script>
+
+<script src="script.js" defer></script>
+
 </body>
 </html>
