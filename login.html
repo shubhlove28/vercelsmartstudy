@@ -1,64 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Responsible Login and Registration Form</title>
-  <link rel="stylesheet" href="login-style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudySmart AI | The Ultimate Study App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="login-style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-  <div class="container" id="container">
-    <!-- Registration Form -->
-    <div class="form-container sign-up-container">
-      <form>
-        <h1>Registration</h1>
-        <input type="text" placeholder="Username" />
-        <input type="email" placeholder="Email" />
-        <input type="password" placeholder="Password" />
-        <button>Register</button>
-      </form>
-    </div>
 
-    <!-- Login Form -->
-    <div class="form-container sign-in-container">
-      <form id="login-form">
-        <h1>Login</h1>
-        <input type="text" placeholder="Username" required />
-        <input type="password" placeholder="Password" required />
+    <header>
+        <nav>
+            <a href="#" class="logo">
+                <i class="fa-solid fa-graduation-cap"></i> StudySmart AI
+            </a>
+            <ul class="nav-links">
+                <li><a href="#">Features</a></li>
+                <li><a href="#">Solutions</a></li>
+                <li><a href="#">Resources</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="#" id="nav-login-btn" class="sign-in-btn">Sign in</a>
+                <a href="#" id="nav-register-btn" class="try-free-btn">Try for Free</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="badge">
+            <i class="fa-solid fa-bolt"></i> #1 AI Study Tool
+        </div>
         
-        <select id="login-role" style="background-color: #eee; border: none; padding: 12px 15px; margin: 8px 0; width: 100%; border-radius: 5px;">
-          <option value="student">Student</option>
-          <option value="teacher">Teacher</option>
-        </select>
-
-        <a href="#">Forgot password?</a>
-        <button type="submit">Login</button>
+        <h1>Study Smarter with AI.<br>Remember More. <i>Stress Less</i></h1>
         
-        <span>or login with social platforms</span>
-        <div class="social-icons">
-          <a href="#"><img src="https://img.icons8.com/ios-filled/20/000000/google-logo.png"/></a>
-          <a href="#"><img src="https://img.icons8.com/ios-filled/20/000000/facebook-new.png"/></a>
-          <a href="#"><img src="https://img.icons8.com/ios-filled/20/000000/linkedin.png"/></a>
+        <p class="subtitle">
+            Turn lectures and any material into a complete, science-backed AI study system—so you understand more, remember longer, and stress less.
+        </p>
+
+        <div class="cta-group">
+            <a href="#" id="hero-register-btn" class="btn-large btn-primary">
+                Get started <i class="fa-solid fa-arrow-right"></i>
+            </a>
         </div>
-      </form>
+    </section>
+
+    <section class="features-grid">
+        <div class="qz-card bg-cyan">
+            <h3>Learn</h3>
+            <div class="mockup-inner">
+                <div class="mock-text-center">The Moon is Beautiful.Is'nt it?</div>
+                <div class="mock-input-box">Type the answer</div>
+            </div>
+        </div>
+
+        <div class="qz-card bg-pink">
+            <h3>Study Guides</h3>
+            <div class="mockup-inner">
+                <div class="mock-title">Indian art</div>
+                <div class="mock-tabs">
+                    <span class="mock-tab">Outline</span>
+                    <span class="mock-tab active">Quick reference</span>
+                </div>
+                <div class="mock-line"></div>
+                <div class="mock-line short"></div>
+                <div class="mock-line"></div>
+            </div>
+        </div>
+
+        <div class="qz-card bg-blue">
+            <h3>Flashcards</h3>
+            <div class="mockup-inner no-shadow">
+                <div class="flashcard-stack">
+                    <span>superior<br>vena cava</span>
+                    <i class="fa-solid fa-heart-pulse text-red"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="qz-card bg-orange">
+            <h3>Practice Tests</h3>
+            <div class="mockup-inner">
+                <div class="mock-score-row">
+                    <div><span class="mock-label">Score</span><br><strong>84%</strong></div>
+                    <div><span class="mock-label">Results</span><br><strong>76/90</strong></div>
+                </div>
+                <div class="mock-result-row">
+                    <i class="fa-solid fa-xmark text-red"></i>
+                    <div class="mock-line red flex-1"></div>
+                </div>
+                <div class="mock-result-row">
+                    <i class="fa-solid fa-check text-green"></i>
+                    <div class="mock-line green flex-1"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-block">
+        <div class="feature-text">
+            <h2>Every class, every test, one ultimate study app</h2>
+            <p>Create your own flashcards or find sets made by teachers, students, and experts. Study them anytime, anywhere with our free app.</p>
+            <div class="store-buttons">
+                <a href="#" class="store-btn">
+                    <i class="fa-brands fa-apple"></i>
+                    <div><span class="store-label">Download on the</span><br><span class="store-title">App Store</span></div>
+                </a>
+                <a href="#" class="store-btn">
+                    <i class="fa-brands fa-google-play"></i>
+                    <div><span class="store-label">GET IT ON</span><br><span class="store-title">Google Play</span></div>
+                </a>
+            </div>
+        </div>
+        <div class="feature-visual visual-bg-blue">
+            <div class="abstract-window">
+                <div class="abstract-search">
+                    <i class="fa-solid fa-magnifying-glass text-blue"></i>
+                    <div class="search-bar">Q World map</div>
+                </div>
+                <div class="abstract-card">
+                    <span>World</span>
+                    <i class="fa-solid fa-earth-asia text-gray"></i>
+                </div>
+            </div>
+            <div class="abstract-phone">
+                 <div class="phone-inner">
+                    <div class="phone-search"><i class="fa-solid fa-magnifying-glass"></i> World map</div>
+                    <div class="phone-card">
+                        <i class="fa-solid fa-earth-asia text-gray"></i>
+                        <span>World</span>
+                    </div>
+                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-block reverse">
+        <div class="feature-text">
+            <h2>Make class material instantly studiable</h2>
+            <p>Turn your slides, videos, and notes into flashcard sets, practice tests, and study guides.</p>
+            <a href="#" class="btn-qz-blue">Try it out</a>
+        </div>
+        <div class="feature-visual visual-bg-pink">
+            <div class="abstract-doc">
+                <div class="doc-title">Biology 101 Notes</div>
+                <div class="mock-line short"></div><div class="mock-line"></div><div class="mock-line"></div>
+                <div class="mock-line short mt-3"></div><div class="mock-line"></div>
+                <div class="mock-line yellow"></div><div class="mock-line"></div>
+            </div>
+            <i class="fa-solid fa-arrow-turn-down abstract-arrow"></i>
+            <div class="abstract-app">
+                <div class="app-badge"><i class="fa-solid fa-list-check text-blue"></i> Study Guides</div>
+                <div class="app-title">Biology 101</div>
+                <div class="app-tabs">
+                    <span>Outline</span>
+                    <span class="active">Quick reference</span>
+                </div>
+                <div class="app-header">Key terms</div>
+                <div class="app-grid">
+                    <div class="grid-box">Mitosis</div><div class="grid-box">a type of cell division...</div>
+                    <div class="grid-box">Interphase</div><div class="grid-box">The cell prepares...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-block">
+        <div class="feature-text">
+            <h2>Test prep for any subject</h2>
+            <p>Memorize anything with personalized practice tests and study sessions in Learn. 98% of students say StudySmart has improved their understanding.</p>
+            <a href="#" class="btn-qz-blue">Get started</a>
+        </div>
+        <div class="feature-visual visual-bg-cyan">
+            <div class="toggle-container">
+                <div class="toggle-row">Multiple Choice <div class="toggle-switch active"></div></div>
+                <div class="toggle-row">Written <div class="toggle-switch"></div></div>
+                <div class="toggle-row">Flashcards <div class="toggle-switch"></div></div>
+            </div>
+            <div class="abstract-test">
+                <div class="test-header"><i class="fa-solid fa-rotate text-blue"></i> Learn</div>
+                <div class="test-subject">
+                    <span>Tree</span>
+                    <i class="fa-solid fa-tree text-green"></i>
+                </div>
+                <div class="test-feedback">Awesome!</div>
+                <div class="test-options">
+                    <div class="option-box">Tierra</div>
+                    <div class="option-box">Hoja</div>
+                    <div class="option-box">Raiz</div>
+                    <div class="option-box correct"><i class="fa-solid fa-check"></i> Arbol</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>About us</h4>
+                <ul>
+                    <li><a href="#">About StudySmart</a></li>
+                    <li><a href="#">How it works</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Advertise with us</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>For students</h4>
+                <ul>
+                    <li><a href="#">Flashcards</a></li>
+                    <li><a href="#">Test</a></li>
+                    <li><a href="#">Learn</a></li>
+                    <li><a href="#">Study groups</a></li>
+                    <li><a href="#">Solutions</a></li>
+                    <li><a href="#">Study Guides</a></li>
+                    <li><a href="#">Pomodoro timer</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>For teachers</h4>
+                <ul>
+                    <li><a href="#">Live</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Be the Change</a></li>
+                    <li><a href="#">Plus for teachers</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">Help center</a></li>
+                    <li><a href="#">Sign up</a></li>
+                    <li><a href="#">Honor code</a></li>
+                    <li><a href="#">Community guidelines</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Terms</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Language</h4>
+                <div class="language-selector">English (USA) <i class="fa-solid fa-chevron-down ml-2"></i></div>
+                <div class="qr-code">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <div class="qr-text">Get the app</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="auth-modal" class="modal-overlay hidden">
+        <div class="modal-close" id="close-modal"><i class="fa-solid fa-xmark"></i></div>
+        
+        <div class="container" id="container">
+            <div class="form-container sign-up-container">
+                <form action="#" id="register-form">
+                    <h1>Create Account</h1>
+                    <span>Join millions studying smarter.</span>
+                    <input type="text" id="reg-username" placeholder="Choose a Username" required />
+                    <input type="email" id="reg-email" placeholder="Enter your Email" required />
+                    <input type="password" id="reg-password" placeholder="Create a Password" required />
+                    
+                    <div class="role-selector">
+                        <input type="radio" id="role-student" name="reg-role" value="student" checked>
+                        <label for="role-student"><i class="fa-solid fa-user-graduate"></i> Student</label>
+                        
+                        <input type="radio" id="role-teacher" name="reg-role" value="teacher">
+                        <label for="role-teacher"><i class="fa-solid fa-chalkboard-user"></i> Teacher</label>
+                    </div>
+                    
+                    <button type="submit" class="auth-btn">Sign Up</button>
+                    <div class="divider"><span>OR</span></div>
+                    <button type="button" class="google-btn" onclick="googleAuth()">
+                        <i class="fa-brands fa-google"></i> Continue with Google
+                    </button>
+                    
+                </form>
+            </div>
+
+            <div class="form-container sign-in-container">
+                <form action="#" id="login-form">
+                    <h1>Welcome Back</h1>
+                    <span>Access your AI study tools</span>
+                    
+                    
+                    <input type="text" id="log-username" placeholder="Username" required />
+                    <input type="password" id="log-password" placeholder="Password" required />
+                    
+                    <a href="#" class="forgot-link">Forgot your password?</a>
+                    <button type="submit" class="auth-btn">Sign In</button>
+                    <div class="divider"><span>OR</span></div>
+                    <button type="button" class="google-btn" onclick="googleAuth()">
+        <i class="fa-brands fa-google"></i> Continue with Google
+    </button>
+    
+                    
+                </form>
+            </div>
+
+            <div class="overlay-container">
+                <div class="overlay">
+                    <div class="overlay-panel overlay-left">
+                        <div class="icon-circle"><i class="fa-solid fa-brain"></i></div>
+                        <h2>Already have an account?</h2>
+                        <p>Login to connect with your AI Tutor and track your progress.</p>
+                        <button type="button" class="ghost auth-btn" id="signIn">Sign In</button>
+                    </div>
+                    <div class="overlay-panel overlay-right">
+                        <div class="icon-circle"><i class="fa-solid fa-rocket"></i></div>
+                        <h2>Study smarter.<br><i>Learn faster.</i></h2>
+                        <p>Enter your details to start your journey with our AI study system.</p>
+                        <button type="button" class="ghost auth-btn" id="signUp">Create Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Overlay Panels -->
-    <div class="overlay-container">
-      <div class="overlay">
-        <div class="overlay-panel overlay-left">
-          <h2>Welcome Back!</h2>
-          <p>Already have an account?</p>
-          <button class="ghost" id="signIn">Login</button>
+    <script src="login-script.js" defer></script>
+    <footer class="simple-footer">
+        <div class="social-links">
+            <i class="fa-brands fa-tiktok"></i>
+            <i class="fa-brands fa-x-twitter"></i>
+            <i class="fa-brands fa-facebook"></i>
+            <i class="fa-brands fa-instagram"></i>
+            <i class="fa-brands fa-youtube"></i>
+            <i class="fa-brands fa-linkedin"></i>
         </div>
-        <div class="overlay-panel overlay-right">
-          <h2>Hello, Welcome!</h2>
-          <p>Don't have an account?</p>
-          <button class="ghost" id="signUp">Register</button>
+        <div class="copyright">
+            &copy; 2026 StudySmart, Inc.
         </div>
-      </div>
-    </div>
-  </div>
-  <script src="login-script.js"></script>
+    </footer>
 </body>
 </html>
