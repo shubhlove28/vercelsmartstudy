@@ -1,5 +1,38 @@
+// --- USER DATABASE ---
+function getUsers() {
+    return JSON.parse(localStorage.getItem('users')) || [];
+}
+
+window.handleRegister = function() {
+    const username = document.getElementById('user-username').value;
+    const password = document.getElementById('user-password').value;
+    const role = document.querySelector('input[name="role"]:checked').value;
+
+    let users = getUsers();
+    if (users.find(u => u.username === username)) return alert("User already exists!");
+
+    users.push({ username, password, role });
+    localStorage.setItem('users', JSON.stringify(users));
+    alert("Registered! Now click Login.");
+};
+
+window.handleLogin = function() {
+    const username = document.getElementById('user-username').value;
+    const password = document.getElementById('user-password').value;
+    
+    let users = getUsers();
+    const user = users.find(u => u.username === username && u.password === password);
+
+    if (user) {
+        localStorage.setItem('userRole', user.role); // Save role for the session
+        localStorage.setItem('currentUser', username);
+        document.getElementById('login-modal').classList.add('hidden');
+        applyRoleView(user.role);
+    } else {
+        alert("Invalid credentials!");
+    }
+};
 // --- CONFIGURATION ---
-const API = 'https://rendersmartstudy.onrender.com'; 
 const dateDisplay = document.getElementById('date-display');
 dateDisplay.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
@@ -14,6 +47,7 @@ let time = 1500; // 25 mins
 let isTimerRunning = false;
 let currentTaskFilter = 'all';
 
+
 // --- TABS LOGIC ---
 const buttons = document.querySelectorAll('.tab-btn');
 const tabs = document.querySelectorAll('.tab');
@@ -26,6 +60,15 @@ window.switchTab = function(tabId) {
     if(activeBtn) activeBtn.classList.add('active');
     
     document.getElementById(tabId).classList.remove('hidden');
+
+    // Force charts to resize/refresh if the Teacher Dash is opened
+    if(tabId === 'teacher-dash') {
+        renderStudentResults();
+        renderBank();
+        
+        // This trick forces Chart.js to re-calculate the size
+        Object.values(Chart.instances).forEach(chart => chart.resize());
+    }
 }
 
 buttons.forEach(btn => {
@@ -33,28 +76,17 @@ buttons.forEach(btn => {
 });
 
 // --- DATA FETCHING ---
-async function loadData() {
-    try {
-        const tRes = await fetch(`${API}/tasks`);
-        const tData = await tRes.json();
-        tasks = Array.isArray(tData) ? tData : []; 
-        
-        const nRes = await fetch(`${API}/notes`);
-        const nData = await nRes.json();
-        notes = Array.isArray(nData) ? nData : [];
-        
-        const rRes = await fetch(`${API}/resources`);
-        const rData = await rRes.json();
-        resources = Array.isArray(rData) ? rData : [];
-        
-        const fRes = await fetch(`${API}/flashcards`);
-        const fData = await fRes.json();
-        flashcards = Array.isArray(fData) ? fData : [];
-        
-    } catch (e) {
-        console.warn('Backend offline or init error', e);
-        tasks = []; notes = []; resources = []; flashcards = [];
-    }
+// --- DATA MANAGEMENT (Local Only) ---
+// --- DATA FETCHING (Now Local-Only) ---
+function loadData() {
+    tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    notes = JSON.parse(localStorage.getItem('notes')) || [];
+    resources = JSON.parse(localStorage.getItem('resources')) || [];
+    flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
+    
+    // Also load the timer state and study hours from storage!
+    studyHours = parseFloat(localStorage.getItem('studyHours')) || 0;
+    
     renderAll();
 }
 
@@ -65,6 +97,97 @@ function renderAll() {
     renderFlashcards();
     updateDashboard();
 }
+// --- STREAK LOGIC ---
+function updateStreak() {
+    const today = new Date().toDateString(); // e.g., "Tue Jun 23 2026"
+    let lastActive = localStorage.getItem('lastActiveDate');
+    let streak = parseInt(localStorage.getItem('studyStreak')) || 0;
+
+    if (lastActive === today) {
+        // User already logged in today, streak stays the same
+    } else if (lastActive) {
+        // Check if the last active date was exactly yesterday
+        let yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        if (lastActive === yesterday.toDateString()) {
+            streak++; // Consecutive day! Add 1
+        } else {
+            streak = 1; // Streak broken, reset to 1
+        }
+    } else {
+        // First time ever using the app
+        streak = 1;
+    }
+
+    // Save the new data back to localStorage
+    localStorage.setItem('lastActiveDate', today);
+    localStorage.setItem('studyStreak', streak);
+
+    // Update the HTML
+    const streakElement = document.getElementById('streak-count');
+    if (streakElement) {
+        streakElement.textContent = streak;
+    }
+}
+function markTodayAsStudied() {
+    const today = new Date().toDateString();
+    let studiedDates = JSON.parse(localStorage.getItem('studiedDates')) || [];
+    
+    if (!studiedDates.includes(today)) {
+        studiedDates.push(today);
+        localStorage.setItem('studiedDates', JSON.stringify(studiedDates));
+    }
+}
+// 1. Trigger Modal on click
+document.querySelector('.streak-badge').onclick = () => {
+    document.getElementById('streak-modal').classList.remove('hidden');
+    renderCalendar();
+};
+
+// 2. Generate Calendar
+window.renderCalendar = function() {
+    const grid = document.getElementById('calendar-grid');
+    const headerDisplay = document.getElementById('calendar-header'); // Add this to HTML
+    grid.innerHTML = '';
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    
+    // Set Header
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    headerDisplay.textContent = `${monthNames[month]} ${year}`;
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+    
+    // Get array of studied dates
+    const studiedDates = JSON.parse(localStorage.getItem('studiedDates')) || [];
+
+    // Empty cells for alignment
+    for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
+
+    // Generate days
+    for (let day = 1; day <= daysInMonth; day++) {
+        const div = document.createElement('div');
+        div.className = 'cal-day';
+        div.textContent = day;
+        
+        // Create a date string for this day to compare
+        const dateToCheck = new Date(year, month, day).toDateString();
+        
+        // If this date is in our "studiedDates" array, mark it active
+        if (studiedDates.includes(dateToCheck)) {
+            div.classList.add('active');
+        }
+        
+        // Highlight today
+        if (day === now.getDate()) div.style.border = "2px solid var(--primary)";
+        
+        grid.appendChild(div);
+    }
+};
 
 // --- DASHBOARD ---
 function updateDashboard() {
@@ -380,13 +503,15 @@ mainReset.onclick = resetTimer;
 
 // --- API HELPER ---
 async function apiCall(endpoint, method, body) {
-    try {
-        await fetch(`${API}/${endpoint}`, {
-            method: method,
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(body)
-        });
-    } catch(e) { console.error(e); }
+    if (method === 'POST') {
+        const item = { ...body, id: Date.now() };
+        if (endpoint === 'tasks') tasks.push(item);
+        if (endpoint === 'notes') notes.push(item);
+        if (endpoint === 'resources') resources.push(item);
+        if (endpoint === 'flashcards') flashcards.push(item);
+        saveData();
+        renderAll();
+    }
 }
 
 // --- INIT ---
@@ -398,53 +523,58 @@ themeBtn.onclick = () => {
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
 };
 
-// --- INIT & THEME ---
 if (localStorage.getItem('theme') === 'light') {
     document.body.classList.add('light');
-    const themeBtn = document.getElementById('theme-toggle');
-    if(themeBtn) themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+    themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
 }
 
-updateTimers();
+// --- INIT ---
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Check if user is logged in
+    const savedRole = localStorage.getItem('userRole');
+    if (!savedRole) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    // 2. Apply UI restrictions
+    applyRoleView(savedRole);
+
+    // 3. Load data and start timers
+    loadData();
+    updateTimers();
+
+    updateStreak();
+});
 
 // --- RBAC & LOGIN LOGIC ---
 window.login = function(role) {
     localStorage.setItem('userRole', role);
-    const loginModal = document.getElementById('login-modal');
-    if (loginModal) loginModal.classList.add('hidden');
-    
-    // Now that they are logged in, load the data and set the view
+    document.getElementById('login-modal').classList.add('hidden');
     applyRoleView(role);
-    loadData(); 
 };
 
 function applyRoleView(role) {
     const isTeacher = role === 'teacher';
     
-    // Toggle UI elements based on class
-    document.querySelectorAll('.student-only').forEach(el => el.style.display = isTeacher ? 'none' : '');
-    document.querySelectorAll('.teacher-only').forEach(el => el.style.display = isTeacher ? 'flex' : 'none');
+    // Explicitly show/hide student and teacher elements
+    const studentElements = document.querySelectorAll('.student-only');
+    const teacherElements = document.querySelectorAll('.teacher-only');
     
-    // Default route on login
-    switchTab(isTeacher ? 'teacher-dash' : 'dashboard');
+    studentElements.forEach(el => el.style.display = isTeacher ? 'none' : 'flex');
+    teacherElements.forEach(el => el.style.display = isTeacher ? 'flex' : 'none');
+    
+    // Ensure the Teacher Panel button itself is visible to teachers
+    const teacherPanelBtn = document.querySelector('[data-tab="teacher-dash"]');
+    if (teacherPanelBtn) {
+        teacherPanelBtn.style.display = isTeacher ? 'flex' : 'none';
+    }
+    
+    // --- CHANGE THIS LINE ---
+    // Instead of switching to teacher-dash, always default to dashboard
+    switchTab('dashboard'); 
 }
 
-// --- BOOTSTRAP THE APP ---
-// Check if user is already logged in on page load
-document.addEventListener('DOMContentLoaded', () => {
-    const savedRole = localStorage.getItem('userRole');
-    const loginModal = document.getElementById('login-modal');
-
-    if (savedRole) {
-        // User is known. Hide modal, set UI, and fetch data.
-        if (loginModal) loginModal.classList.add('hidden');
-        applyRoleView(savedRole);
-        loadData();
-    } else {
-        // User is unknown. Ensure modal is visible and do NOT load data yet.
-        if (loginModal) loginModal.classList.remove('hidden');
-    }
-});
 
 // --- ANTI-CHEATING: PAGE VISIBILITY API  ---
 document.addEventListener("visibilitychange", () => {
@@ -457,11 +587,13 @@ document.addEventListener("visibilitychange", () => {
 });
 
 // --- EXAM LOGIC ---
-const examQuestions = [
-    { id: 1, text: "Which data structure is used in Breadth-First Search?", options: ["Stack", "Queue", "Tree", "Graph"], answer: 1, topic: "Data Structures", difficulty: "Medium" },
-    { id: 2, text: "What is the time complexity of binary search?", options: ["O(n)", "O(n log n)", "O(log n)", "O(1)"], answer: 2, topic: "Algorithms", difficulty: "Easy" },
-    { id: 3, text: "Which model does Scikit-learn primarily support?", options: ["Deep Learning", "Machine Learning", "Quantum Computing", "Blockchain"], answer: 1, topic: "Machine Learning", difficulty: "Easy" }
+// Load the question bank from storage, or use a default if empty
+let examQuestions = JSON.parse(localStorage.getItem('examBank')) || [
+    { id: 1, text: "Sample Question 1", options: ["A", "B", "C", "D"], answer: 0 }
+    // ... add your default base questions here
 ];
+
+let examConfig = JSON.parse(localStorage.getItem('examConfig')) || { duration: 300, questionCount: 3 };
 
 let currentQ = 0;
 let studentAnswers = {};
@@ -469,22 +601,27 @@ let examTime = 300; // 5 minutes in seconds
 let examInterval;
 
 // --- EXAM EXECUTION LOGIC (UPDATED) ---
-let activeQuestions = []; // The specific questions chosen for this run
+// --- EXAM EXECUTION LOGIC (ADVANCED MCQ UI) ---
+let activeQuestions = [];
+let questionStates = []; // Tracks: 'not-visited', 'not-answered', 'answered', 'marked'
 
 window.startExam = function() {
+    const config = JSON.parse(localStorage.getItem('examConfig')) || { duration: 300, questionCount: 3 };
+    const requestedCount = Math.min(config.questionCount, examQuestions.length);
+
     document.getElementById('exam-start-card').classList.add('hidden');
     document.getElementById('exam-container').classList.remove('hidden');
     
-    // Apply Teacher Configurations
-    examTime = configuredDuration;
+    examTime = config.duration;
     
-    // Shuffle the question bank and pick the requested amount
-    activeQuestions = examQuestions
-        .sort(() => 0.5 - Math.random()) // Simple shuffle
-        .slice(0, configuredLimit);      // Limit to teacher's setting
-
-    studentAnswers = {}; // Reset answers
-    currentQ = 0;        // Reset index
+    // Prep questions and initial state
+    activeQuestions = examQuestions.sort(() => 0.5 - Math.random()).slice(0, requestedCount); 
+    studentAnswers = {};
+    questionStates = new Array(activeQuestions.length).fill('not-visited');
+    
+    // The first question becomes 'not-answered' as soon as the test starts
+    if(activeQuestions.length > 0) questionStates[0] = 'not-answered';
+    currentQ = 0;
 
     examInterval = setInterval(() => {
         examTime--;
@@ -495,12 +632,12 @@ window.startExam = function() {
     }, 1000);
 
     renderQuestion();
+    renderNavGrid();
 }
 
 window.renderQuestion = function() {
     const q = activeQuestions[currentQ];
-    // Use activeQuestions.length instead of examQuestions.length
-    document.getElementById('q-number').textContent = `Question ${currentQ + 1} of ${activeQuestions.length}`;
+    document.getElementById('q-number').textContent = `Question No. ${currentQ + 1}`;
     document.getElementById('question-area').textContent = q.text;
     
     const optionsArea = document.getElementById('options-area');
@@ -516,36 +653,147 @@ window.renderQuestion = function() {
         `;
     });
 
-    document.getElementById('prev-btn').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
+    // Check if it's the last question
     const isLast = currentQ === activeQuestions.length - 1;
-    document.getElementById('next-btn').classList.toggle('hidden', isLast);
+    document.getElementById('save-next-btn').classList.toggle('hidden', isLast);
     document.getElementById('submit-exam-btn').classList.toggle('hidden', !isLast);
 }
 
-window.submitExam = function() {
-    clearInterval(examInterval);
-    let correct = 0, wrong = 0, unattempted = 0;
+window.selectOption = function(index) {
+    studentAnswers[currentQ] = index;
+    renderQuestion(); // visually update radio button
+}
 
-    // Loop over activeQuestions, not the whole bank
-    activeQuestions.forEach((q, i) => {
-        if (studentAnswers[i] === undefined) unattempted++;
-        else if (studentAnswers[i] === q.answer) correct++;
-        else wrong++;
+window.clearResponse = function() {
+    delete studentAnswers[currentQ];
+    questionStates[currentQ] = 'not-answered';
+    renderQuestion();
+    renderNavGrid();
+}
+
+window.saveAndNext = function() {
+    // If they picked an answer, mark answered. Else, marked not-answered.
+    if (studentAnswers[currentQ] !== undefined) {
+        questionStates[currentQ] = 'answered';
+    } else {
+        questionStates[currentQ] = 'not-answered';
+    }
+    
+    if (currentQ < activeQuestions.length - 1) {
+        jumpToQuestion(currentQ + 1);
+    } else {
+        renderNavGrid(); // Just update grid if on last question
+    }
+}
+
+window.markForReview = function() {
+    questionStates[currentQ] = 'marked';
+    if (currentQ < activeQuestions.length - 1) {
+        jumpToQuestion(currentQ + 1);
+    } else {
+        renderNavGrid();
+    }
+}
+
+window.jumpToQuestion = function(index) {
+    // Update old question state if we leave it without answering
+    if (questionStates[currentQ] === 'not-visited') {
+        questionStates[currentQ] = 'not-answered';
+    }
+    
+    currentQ = index;
+    
+    // Update new question state if it was unvisited
+    if (questionStates[currentQ] === 'not-visited') {
+        questionStates[currentQ] = 'not-answered';
+    }
+
+    renderQuestion();
+    renderNavGrid();
+}
+
+function renderNavGrid() {
+    const grid = document.getElementById('question-nav-grid');
+    grid.innerHTML = '';
+    
+    let counts = { 'answered': 0, 'marked': 0, 'not-visited': 0, 'not-answered': 0 };
+
+    questionStates.forEach((state, index) => {
+        counts[state]++;
+        
+        const btn = document.createElement('button');
+        btn.className = `nav-circle nav-${state}`;
+        btn.innerText = index + 1;
+        
+        // Add a slight border/glow to the CURRENT question being viewed
+        if (index === currentQ) {
+            btn.style.boxShadow = "0 0 0 3px var(--text)";
+        }
+
+        btn.onclick = () => jumpToQuestion(index);
+        grid.appendChild(btn);
     });
 
-    const finalScore = (correct * 4) - (wrong * 1); 
+    // Update the UI Counters
+    document.getElementById('count-answered').innerText = counts['answered'];
+    document.getElementById('count-marked').innerText = counts['marked'];
+    document.getElementById('count-not-visited').innerText = counts['not-visited'];
+    document.getElementById('count-not-answered').innerText = counts['not-answered'];
+}
+window.submitExam = function() {
+    // 1. Stop the clock
+    clearInterval(examInterval);
+
+    // 2. Logic Variables
+    let correct = 0;
+    let wrong = 0;
+    let unattempted = 0;
+
+    // 3. Loop through activeQuestions based on index
+    activeQuestions.forEach((q, i) => {
+        const answer = studentAnswers[i];
+        
+        if (answer === undefined) {
+            unattempted++;
+        } else if (answer === q.answer) {
+            correct++;
+        } else {
+            wrong++;
+        }
+    });
+
+    // 4. Calculate Score (4 for correct, -1 for wrong)
+    const finalScore = (correct * 4) - (wrong * 1);
     const maxScore = activeQuestions.length * 4;
 
-    document.getElementById('exam-container').innerHTML = `
-        <div class="center-content text-center">
-            <h2>Exam Submitted!</h2>
-            <h1 class="mt-2" style="color: var(--primary); font-size: 3rem;">${finalScore} / ${maxScore}</h1>
-            <p class="mt-2">Correct: ${correct} | Wrong: ${wrong} | Unattempted: ${unattempted}</p>
-            <p class="mt-2" style="color: var(--text-muted);">AI Topic Analysis generated and sent to dashboard.</p>
-            <button class="primary-btn mt-2" onclick="location.reload()">Return Home</button>
+    // 5. Save Results
+    const resultEntry = {
+        student: localStorage.getItem('currentUser') || 'Anonymous',
+        score: finalScore,
+        date: new Date().toLocaleDateString(),
+        attempted: (correct + wrong)
+    };
+    
+    let results = JSON.parse(localStorage.getItem('studentResults')) || [];
+    results.push(resultEntry);
+    localStorage.setItem('studentResults', JSON.stringify(results));
+
+    // 6. UI Update: Show the Results directly in the container
+    const container = document.getElementById('exam-container');
+    container.innerHTML = `
+        <div class="widget-card" style="text-align: center; padding: 3rem;">
+            <i class="fa-solid fa-trophy" style="font-size: 4rem; color: var(--amber); margin-bottom: 1rem;"></i>
+            <h2>Assessment Submitted!</h2>
+            <h1 style="font-size: 3.5rem; color: var(--primary); margin: 1rem 0;">${finalScore} <span style="font-size: 1.5rem; color: var(--text-muted);">/ ${maxScore}</span></h1>
+            <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 2rem;">
+                <p style="color: var(--emerald); font-weight: bold;">Correct: ${correct}</p>
+                <p style="color: var(--red); font-weight: bold;">Wrong: ${wrong}</p>
+                <p style="color: var(--text-muted);">Unattempted: ${unattempted}</p>
+            </div>
+            <button class="primary-btn" onclick="location.reload()">Return to Dashboard</button>
         </div>
     `;
-}
+};
 
 // --- TEACHER DASHBOARD LOGIC ---
 let configuredDuration = 300; // default 5 mins
@@ -553,9 +801,36 @@ let configuredLimit = 3;      // default 3 questions
 
 window.saveTestConfig = function() {
     const mins = parseInt(document.getElementById('config-duration').value) || 5;
-    configuredLimit = parseInt(document.getElementById('config-count').value) || 3;
-    configuredDuration = mins * 60;
-    alert(`Test Updated: ${configuredLimit} questions, ${mins} minutes.`);
+    const count = parseInt(document.getElementById('config-count').value) || 3;
+    
+    examConfig = {
+        duration: mins * 60,
+        questionCount: count
+    };
+    
+    // Save this config so students can access it
+    localStorage.setItem('examConfig', JSON.stringify(examConfig));
+    alert(`Test Settings Saved: ${count} questions, ${mins} minutes.`);
+};
+
+function renderBank() {
+    const bankList = document.getElementById('bank-list');
+    bankList.innerHTML = examQuestions.map((q, index) => `
+        <div class="mini-task">
+            <div>
+                <strong>${index + 1}. ${q.text}</strong>
+                <p style="font-size:0.75rem; color:var(--text-muted);">Options: ${q.options.join(', ')}</p>
+            </div>
+            <button onclick="removeQuestion(${q.id})" class="text-btn" style="color:var(--red);">Delete</button>
+        </div>
+    `).join('');
+}
+
+// 2. Remove Question Function
+window.removeQuestion = function(id) {
+    examQuestions = examQuestions.filter(q => q.id !== id);
+    localStorage.setItem('examBank', JSON.stringify(examQuestions));
+    renderBank();
 };
 
 window.addCustomQuestion = function() {
@@ -563,26 +838,148 @@ window.addCustomQuestion = function() {
     const optionsRaw = document.getElementById('custom-q-options').value;
     const answerIdx = parseInt(document.getElementById('custom-q-ans').value);
 
+    // 1. Prevent more than 50 questions
+    if (examQuestions.length >= 50) {
+        return alert("Error: Maximum question limit (50) reached.");
+    }
+
     if (!text || !optionsRaw) return alert("Please fill out the question and options.");
     
     const options = optionsRaw.split(',').map(opt => opt.trim());
-    if (options.length < 2) return alert("Provide at least 2 options separated by commas.");
-
+    
     examQuestions.push({
         id: Date.now(),
         text: text,
         options: options,
-        answer: answerIdx,
-        topic: "Custom Addition",
-        difficulty: "Teacher Selection"
+        answer: answerIdx
     });
 
+    // 2. SAVE to localStorage so it stays after refresh
+    localStorage.setItem('examBank', JSON.stringify(examQuestions));
+    
+    alert(`Question added to the bank successfully! Current bank size: ${examQuestions.length}/50`);
     document.getElementById('custom-q-text').value = '';
     document.getElementById('custom-q-options').value = '';
-    alert("Question added to the bank successfully!");
 };
+
 window.selectOption = function(index) {
     studentAnswers[currentQ] = index;
     // Refresh the UI to show the selection
     renderQuestion();
 };
+
+// --- LOGOUT LOGIC ---
+window.logout = function() {
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+};
+// --- AUTH GUARD ---
+// If the user isn't logged in, force them to the login page immediately
+if (!localStorage.getItem('userRole')) {
+    window.location.href = "login.html";
+}
+
+// --- TEACHER DASHBOARD CHARTS (Chart.js) ---
+// Add this at the top of your JS file with your other state variables
+let dynamicResultChart = null; 
+
+document.addEventListener("DOMContentLoaded", () => {
+    // ... your existing init code ...
+
+    if(document.getElementById('performanceChart')) {
+        // 1. Performance Donut Chart (Leave as is for now, or update similarly)
+        new Chart(document.getElementById('performanceChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Maths', 'Science', 'English', 'Computer'],
+                datasets: [{ data: [40, 20, 25, 15], backgroundColor: ['#fbe018', '#28d734', '#8e11fc', '#ef511c'], borderWidth: 0 }]
+            },
+            options: { cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } } }
+        });
+
+        // 2. Results Donut Chart (Make it dynamic)
+        const ctxResult = document.getElementById('resultChart').getContext('2d');
+        dynamicResultChart = new Chart(ctxResult, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pass', 'Fail'],
+                datasets: [{
+                    data: [0, 0], // Starts at 0, updated dynamically
+                    backgroundColor: ['#10b981', '#ef4444'], // Emerald for Pass, Red for Fail
+                    borderWidth: 0
+                }]
+            },
+            options: { cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } } }
+        });
+
+        // 3. Attendance Line Chart
+        new Chart(document.getElementById('attendanceChart'), {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [
+                    { label: 'Class A', data: [30, 50, 140, 95, 150, 110, 85], borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4 },
+                    { label: 'Class B', data: [15, 40, 85, 60, 130, 150, 135], borderColor: '#a855f7', borderDash: [5, 5], backgroundColor: 'rgba(168, 85, 247, 0.1)', fill: true, tension: 0.4 }
+                ]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { position: 'top', align: 'end', labels: { color: '#94a3b8' } } }, scales: { y: { beginAtZero: true, ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } }
+        });
+    }
+});
+
+function renderStudentResults() {
+    const results = JSON.parse(localStorage.getItem('studentResults')) || [];
+    const body = document.getElementById('results-body');
+    
+    // Clear existing table rows
+    body.innerHTML = '';
+    
+    let passCount = 0;
+    let failCount = 0;
+
+    results.forEach(r => {
+        // Generate Table Rows
+        body.innerHTML += `
+            <tr>
+                <td>${r.student}</td>
+                <td>${r.score}</td>
+                <td>${r.date}</td>
+            </tr>
+        `;
+        
+        // Calculate dynamic chart data (Assuming a score > 0 is a pass for this example)
+        if (r.score > 0) {
+            passCount++;
+        } else {
+            failCount++;
+        }
+    });
+
+    // Update the Chart.js instance with real data
+    if (dynamicResultChart) {
+        dynamicResultChart.data.datasets[0].data = [passCount, failCount];
+        // Update labels to show actual numbers
+        dynamicResultChart.data.labels = [`${passCount} Pass`, `${failCount} Fail`];
+        dynamicResultChart.update(); // Trigger the chart to re-render
+    }
+}
+function renderAssignments() {
+    const studentOrg = localStorage.getItem('userOrg'); // Set this during login
+    const assignmentsList = document.getElementById('student-assignments');
+    
+    // Retrieve all assignments
+    const allAssignments = JSON.parse(localStorage.getItem('assignments')) || [];
+    
+    // Filter by Organization
+    const myAssignments = allAssignments.filter(a => a.orgId === studentOrg);
+    
+    assignmentsList.innerHTML = myAssignments.map(a => `
+        <div class="assignment-card">
+            <h3>${a.title}</h3>
+            <p>From Teacher: ${a.teacherName}</p>
+            <button onclick="takeExam(${a.id})">Start Assessment</button>
+        </div>
+    `).join('');
+}
+
